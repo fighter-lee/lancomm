@@ -14,7 +14,7 @@ LAN-COMM主要用于在同一局域网下的设备之间的相互发现与通讯
 
 demo示例：
 
-![demo](doc\img\demo.gif)
+![demo](doc/img/demo.gif)
 
 
 ## 2 使用说明
