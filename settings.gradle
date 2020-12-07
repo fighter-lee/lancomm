@@ -1,0 +1,4 @@
+include ':common'
+include ':lancomm'
+include ':app'
+rootProject.name = "lancomm-demo"
