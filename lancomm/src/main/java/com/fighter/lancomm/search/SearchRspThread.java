@@ -1,7 +1,11 @@
 package com.fighter.lancomm.search;
 
+import android.app.Service;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.util.Log;
 
+import com.fighter.common.ContextVal;
 import com.fighter.lancomm.data.Const;
 import com.fighter.lancomm.utils.Utils;
 
@@ -52,11 +56,13 @@ public class SearchRspThread extends Thread {
             socket = null;
         }
         openFlag = false;
+        releaseLock();
     }
 
 
     @Override
     public void run() {
+        wakeLock();
         try {
             //指定接收数据包的端口
             socket = new DatagramSocket(Const.DEVICE_SEARCH_PORT);
@@ -109,5 +115,20 @@ public class SearchRspThread extends Thread {
         tarIp = Utils.ipbyteToString(ipData);
         Log.v(TAG, Utils.getDeviceIp() + Const.RECEIVE_SYMBOL + tarIp + " 搜索请求");
         return true;
+    }
+
+    private WakeLock wakelock;
+
+    private void wakeLock() {
+        PowerManager pm = (PowerManager) ContextVal.getContext()
+                .getSystemService(Service.POWER_SERVICE);
+        wakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, this.getClass().getName());
+        wakelock.acquire();
+    }
+
+    private void releaseLock() {
+        if (wakelock != null && wakelock.isHeld()) {
+            wakelock.release();
+        }
     }
 }

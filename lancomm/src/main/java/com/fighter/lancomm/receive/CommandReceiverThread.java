@@ -1,7 +1,11 @@
 package com.fighter.lancomm.receive;
 
+import android.app.Service;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.util.Log;
 
+import com.fighter.common.ContextVal;
 import com.fighter.common.ConvertUtils;
 import com.fighter.common.Trace;
 import com.fighter.lancomm.data.CommData;
@@ -53,13 +57,14 @@ public class CommandReceiverThread extends Thread {
     }
 
     public void destory() {
-
+        releaseLock();
     }
 
     volatile boolean openFlag;
 
     @Override
     public void run() {
+        wakeLock();
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(Const.COMMAND_PORT);
@@ -139,6 +144,21 @@ public class CommandReceiverThread extends Thread {
         List<DataListener> receivers = ReceiverImpl.getImpl().getReceivers();
         for (DataListener receiver : receivers) {
             receiver.onCommandArrive(commData);
+        }
+    }
+
+    private WakeLock wakelock;
+
+    private void wakeLock() {
+        PowerManager pm = (PowerManager) ContextVal.getContext()
+                .getSystemService(Service.POWER_SERVICE);
+        wakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, this.getClass().getName());
+        wakelock.acquire();
+    }
+
+    private void releaseLock() {
+        if (wakelock != null && wakelock.isHeld()) {
+            wakelock.release();
         }
     }
 }

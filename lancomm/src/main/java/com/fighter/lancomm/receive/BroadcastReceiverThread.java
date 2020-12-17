@@ -1,7 +1,11 @@
 package com.fighter.lancomm.receive;
 
+import android.app.Service;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.util.Log;
 
+import com.fighter.common.ContextVal;
 import com.fighter.common.ConvertUtils;
 import com.fighter.lancomm.data.CommData;
 import com.fighter.lancomm.data.Const;
@@ -25,11 +29,12 @@ public class BroadcastReceiverThread extends Thread {
 
     private static final String TAG = "ReceiverThread";
     private static BroadcastReceiverThread receiverThread;
+    private WakeLock wakelock;
 
     /**
      * 启动接收线程
      */
-    public static void open() {
+    public synchronized static void open() {
         if (receiverThread == null) {
             receiverThread = new BroadcastReceiverThread();
             receiverThread.start();
@@ -39,7 +44,7 @@ public class BroadcastReceiverThread extends Thread {
     /**
      * 关闭接收线程
      */
-    public static void close() {
+    public synchronized static void close() {
         if (receiverThread != null) {
             receiverThread.destory();
             receiverThread = null;
@@ -55,10 +60,12 @@ public class BroadcastReceiverThread extends Thread {
             socket = null;
         }
         openFlag = false;
+        releaseLock();
     }
 
     @Override
     public void run() {
+        wakeLock();
         try {
             //指定接收数据包的端口
             socket = new DatagramSocket(Const.DEVICE_BROADCAST_PORT);
@@ -139,6 +146,19 @@ public class BroadcastReceiverThread extends Thread {
         byte[] ipData = new byte[4];
         System.arraycopy(data, 2, ipData, 0, 4);
         return ipData;
+    }
+
+    public void wakeLock() {
+        PowerManager pm = (PowerManager) ContextVal.getContext()
+                .getSystemService(Service.POWER_SERVICE);
+        wakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, this.getClass().getName());
+        wakelock.acquire();
+    }
+
+    public void releaseLock() {
+        if (wakelock != null && wakelock.isHeld()) {
+            wakelock.release();
+        }
     }
 
 }
