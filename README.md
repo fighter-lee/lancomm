@@ -125,7 +125,7 @@ LanCommManager.getCommunicator().sendCommand(command);
 
 ### 3 Kotlin扩展函数
 
-####3.1 获取管理类
+#### 3.1 获取管理类
 ```
         //获取广播器
         broadcaster
@@ -139,7 +139,7 @@ LanCommManager.getCommunicator().sendCommand(command);
         //获取点对点消息器
         communicator
 ```
-####3.1 发送点对点消息
+#### 3.1 发送点对点消息
 ```
 //发送点对点消息
         sendCommand{
