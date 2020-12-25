@@ -1,3 +1,4 @@
+include ':lancomm-kt'
 include ':common'
 include ':lancomm'
 include ':app'
